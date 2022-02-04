@@ -1,5 +1,8 @@
 package handlers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -7,9 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -19,14 +19,8 @@ import com.jayway.jsonpath.Option;
 
 import helio.blueprints.components.DataHandler;
 
-/**
- * This object implements the {@link DataHandler} interface allowing to handle Json documents. It allows to reference data allocated in an Json document using <a href="https://support.smartbear.com/alertsite/docs/monitors/api/endpoint/jsonpath.html">Json Path</a> expressions. An online tool to check whether a Json Path correctly references data from a Json object can be found at <a href="https://jsonpath.com/">https://jsonpath.com/</a>
- * This object can be configured with a {@link JsonObject} that must contain the key 'iterator' which value is a Json Path used to split the Json document into sub-documents.
- * @author Andrea Cimmino
- *
- */
 public class JsonHandler implements DataHandler {
-
+	
 	private static final long serialVersionUID = 1L;
 	private static final Gson GSON = new Gson();
 	private String iterator;
@@ -64,11 +58,19 @@ public class JsonHandler implements DataHandler {
 												.addOptions(Option.REQUIRE_PROPERTIES)
 												.addOptions(Option.DEFAULT_PATH_LEAF_TO_NULL);
 			try {
-				List<Map<String,String>> results = JsonPath.using(conf).parse(dataStream).read(iterator);
-				for (Map<String, String> map : results) {
-					if( map != null && !map.isEmpty())
-						queueOfresults.add(GSON.toJson(map));
+				List<Object> results = JsonPath.using(conf).parse(dataStream).read(iterator);
+				for (Object result : results) {
+					if(result instanceof Map) {
+						@SuppressWarnings("unchecked")
+						Map<String,String> map = (Map<String,String>) result;
+						if( map != null && !map.isEmpty())
+							queueOfresults.add(GSON.toJson(map));
+					}else {
+						queueOfresults.add(result.toString());
+					}
 				}
+					
+					
 
 				dataStream.close();
 			} catch (Exception e) {
@@ -113,7 +115,4 @@ public class JsonHandler implements DataHandler {
 		}
 
 	}
-
-
-
 }
