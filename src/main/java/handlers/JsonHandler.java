@@ -3,25 +3,21 @@ package handlers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 
-import helio.blueprints.components.DataHandler;
+import helio.blueprints.DataHandler;
+
 
 public class JsonHandler implements DataHandler {
 	
-	private static final long serialVersionUID = 1L;
 	private static final Gson GSON = new Gson();
 	private String iterator;
 	Logger logger = LoggerFactory.getLogger(JsonHandler.class);
@@ -50,15 +46,16 @@ public class JsonHandler implements DataHandler {
 		this.iterator = iterator;
 	}
 
-	public Queue<String> splitData(InputStream dataStream) {
-		ConcurrentLinkedQueue<String> queueOfresults = new ConcurrentLinkedQueue<>();
-		if(dataStream!=null) {
+	@Override
+	public List<String> iterator(String dataChunk) {
+		List<String> queueOfresults = new ArrayList<>();
+		if(dataChunk!=null) {
 			Configuration conf =  Configuration.defaultConfiguration()
 												.addOptions(Option.ALWAYS_RETURN_LIST)
 												.addOptions(Option.REQUIRE_PROPERTIES)
 												.addOptions(Option.DEFAULT_PATH_LEAF_TO_NULL);
 			try {
-				List<Object> results = JsonPath.using(conf).parse(dataStream).read(iterator);
+				List<Object> results = JsonPath.using(conf).parse(dataChunk).read(iterator);
 				for (Object result : results) {
 					if(result instanceof Map) {
 						@SuppressWarnings("unchecked")
@@ -69,10 +66,6 @@ public class JsonHandler implements DataHandler {
 						queueOfresults.add(result.toString());
 					}
 				}
-					
-					
-
-				dataStream.close();
 			} catch (Exception e) {
 				logger.error(e.toString());
 			}
@@ -115,4 +108,5 @@ public class JsonHandler implements DataHandler {
 		}
 
 	}
+
 }
