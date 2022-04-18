@@ -86,6 +86,10 @@ public class JsonHandler implements DataHandler {
 				if (parsed instanceof Collection) {
 					List<Object> resultsAux = (List<Object>) parsed;
 					resultsAux.stream().filter(elem -> elem!=null).forEach(elem -> results.add(elem.toString()));
+				}else if(parsed instanceof Map) {
+					Map<String,String> map = (Map<String,String>) parsed;
+					if( map != null && !map.isEmpty())
+						results.add(GSON.toJson(map));
 				}else {
 					results.add(String.valueOf(parsed));
 				}
@@ -106,7 +110,7 @@ public class JsonHandler implements DataHandler {
 		}else {
 			throw new IllegalArgumentException("JsonHandler needs to receive json object with the mandatory key 'iterator'");
 		}
-
+		
 	}
 
 }
