@@ -85,13 +85,16 @@ public class JsonHandler implements DataHandler {
 			if(parsed!=null) {
 				if (parsed instanceof Collection) {
 					List<Object> resultsAux = (List<Object>) parsed;
-					resultsAux.stream().filter(elem -> elem!=null).forEach(elem -> results.add(elem.toString()));
-				}else if(parsed instanceof Map) {
+					resultsAux.stream().filter(elem -> elem!=null).forEach(elem -> toSimpleResult(elem, results));
+				}/*else if(parsed instanceof Map) {
 					Map<String,String> map = (Map<String,String>) parsed;
 					if( map != null && !map.isEmpty())
 						results.add(GSON.toJson(map));
 				}else {
 					results.add(String.valueOf(parsed));
+				}*/
+				else {
+					toSimpleResult(parsed, results);
 				}
 			}
 		}catch(Exception e) {
@@ -101,6 +104,17 @@ public class JsonHandler implements DataHandler {
 		return results;
 	}
 
+	private void toSimpleResult(Object parsed, List<String> results) {
+		if(parsed instanceof Map) {
+			@SuppressWarnings("unchecked")
+			Map<String,String> map = (Map<String,String>) parsed;
+			if( map != null && !map.isEmpty())
+				results.add(GSON.toJson(map));
+		}else {
+			results.add(String.valueOf(parsed));
+		}
+	}
+	
 	@Override
 	public void configure(JsonObject arguments) {
 		if(arguments.has(CONFIGURATION_KEY)) {
