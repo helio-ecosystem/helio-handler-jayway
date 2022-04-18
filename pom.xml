@@ -21,7 +21,7 @@
 		<dependency>
 			<groupId>io.github.helio-ecosystem</groupId>
 			<artifactId>helio-blueprints</artifactId>
-			<version>0.4.11</version>
+			<version>0.4.20</version>
 		</dependency>
 
 		<!-- Loggin -->
